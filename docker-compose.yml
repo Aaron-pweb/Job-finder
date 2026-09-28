@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: jobsdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  scraper:
+    build: .
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgrespassword@db:5432/jobsdb
+      - TELEGRAM_CHANNEL_URL=https://t.me/s/freelance_ethio
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - TARGET_CATEGORIES=${TARGET_CATEGORIES}
+      - SCRAPE_INTERVAL_MINUTES=10
+    depends_on:
+      - db
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
